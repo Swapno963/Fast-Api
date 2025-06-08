@@ -1,36 +1,33 @@
 from fastapi import FastAPI, HTTPException
-from enum import Enum
+from schemas import Band, GenreUrlChoices
 app = FastAPI()
 
 BAND = [
     {"id": 1, "name": "Band A", "genre": "Rock"},
-    {"id": 2, "name": "Band B", "genre": "Pop"},
+    {"id": 2, "name": "Band B", "genre": "Pop", "albutms": [
+        {"title": "Album 1", "release_date": "2020-03-24"}
+        ]
+    },
     {"id": 3, "name": "Band C", "genre": "Jazz"},
     {"id": 4, "name": "Band D", "genre": "Classical"},
     {"id": 5, "name": "Band E", "genre": "Hip Hop"},
 ]
+
 @app.get("/bands")
-async def index() -> list[dict]:
-    return BAND
+async def index() -> list[Band]:
+    return [Band(**b) for b in BAND]
 
 
 
 @app.get("/bands/{band_id}")
-async def band(band_id: int) -> dict:
-    band = next((b for b in BAND if b["id"] == band_id), None)
+async def band(band_id: int) -> Band:
+    band = next((Band(**b) for b in BAND if b["id"] == band_id), None)
     if band is None:
         raise HTTPException(status_code=404, detail="Band not found")
     return band 
 
 
 
-# define genre choices
-class GenreUrlChoices(Enum):
-    ROCK = "rock"
-    POP = "pop"
-    JAZZ = "jazz"
-    CLASSICAL = "classical"
-    HIP_HOP = "hip_hop"
 
 
 # Get all bands by genra
